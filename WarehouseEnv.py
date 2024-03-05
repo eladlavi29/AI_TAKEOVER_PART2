@@ -3,6 +3,9 @@ from copy import copy
 import pygame
 
 board_size = 5
+
+#hi!!!
+
 import time
 
 def manhattan_distance(p0, p1):
