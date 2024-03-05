@@ -5,7 +5,7 @@ import pygame
 board_size = 5
 
 #hi!!!
-
+#88888888888888
 import time
 
 def manhattan_distance(p0, p1):
