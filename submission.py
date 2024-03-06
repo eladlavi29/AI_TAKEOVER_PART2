@@ -5,6 +5,8 @@ import numpy as np
 
 # TODO: section a : 3
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
+    #TODO: print heuristic of mission and h at different points
+
     h = 0
     robot = env.get_robot(robot_id)
 
@@ -13,9 +15,9 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     else:
         doesHoldBox = 0
 
-    h += robot.battery + robot.credit + 2 * doesHoldBox
+    h += 2 * robot.battery + 2 * robot.credit + doesHoldBox
 
-    max = -100
+    mission = -100
 
     for package in env.packages:
         if doesHoldBox == 1:
@@ -23,28 +25,31 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
             utility = manhattan_distance(robot.package.position, robot.package.destination) * 2 - cost
 
         else:
-            cost = manhattan_distance(robot.position, package.position) + manhattan_distance(package.destination, package.position) + 2
+            cost = 4 * manhattan_distance(robot.position, package.position) + manhattan_distance(package.destination, package.position) + 2
             utility = manhattan_distance(package.position, package.destination) * 2 - cost
 
-        if(utility > max):
-            max = utility
+        if(utility > mission):
+            mission = utility
 
-    if(max == -100):
+    if(mission == -100):
         min = manhattan_distance(robot.position, env.charge_stations[0].position)
 
         if min > manhattan_distance(robot.position, env.charge_stations[1].position):
             min = manhattan_distance(robot.position, env.charge_stations[1].position)
 
-        max = 10 - min
+        mission = 10 - min
 
 
-    return h + max
+    return h + mission
 class AgentGreedyImproved(AgentGreedy):
     def heuristic(self, env: WarehouseEnv, robot_id: int):
         return smart_heuristic(env, robot_id)
 
 
 class AgentMinimax(Agent):
+
+    def heuristic(self, env: WarehouseEnv, robot_id: int):
+        return smart_heuristic(env, robot_id)
     # TODO: section b : 1
     def RBminimax(self,env: WarehouseEnv,agent_id,D,turn=True ):
         if env.done() or D == 0:
@@ -71,7 +76,7 @@ class AgentMinimax(Agent):
 
 
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        return self.RBminimax(env,agent_id,4,True)[1]
+        return self.RBminimax(env,agent_id,5,True)[1]
 
 
 class AgentAlphaBeta(Agent):
