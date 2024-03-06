@@ -114,7 +114,5 @@ def run_agents():
         print("Draws: ", draws)
 
 
-
-
 if __name__ == "__main__":
     run_agents()

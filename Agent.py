@@ -1,7 +1,6 @@
 from WarehouseEnv import WarehouseEnv, manhattan_distance
 import random
 
-
 class Agent:
     # returns the next operator to be applied - i.e. takes one turn
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
@@ -20,13 +19,11 @@ class Agent:
         other_robot = env.get_robot((robot_id + 1) % 2)
         return robot.credit - other_robot.credit
 
-
 # picks random operators from the legal ones
 class AgentRandom(Agent):
     def run_step(self, env: WarehouseEnv, robot_id, time_limit):
         operators, _ = self.successors(env, robot_id)
         return random.choice(operators)
-
 
 class AgentGreedy(Agent):
     def run_step(self, env: WarehouseEnv, robot_id, time_limit):

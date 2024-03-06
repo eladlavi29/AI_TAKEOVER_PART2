@@ -1,7 +1,7 @@
 from Agent import Agent, AgentGreedy
 from WarehouseEnv import WarehouseEnv, manhattan_distance
 import random
-
+import numpy as np
 
 # TODO: section a : 3
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
@@ -37,6 +37,7 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
 
         max = 10 - min
 
+
     return h + max
 class AgentGreedyImproved(AgentGreedy):
     def heuristic(self, env: WarehouseEnv, robot_id: int):
@@ -45,8 +46,32 @@ class AgentGreedyImproved(AgentGreedy):
 
 class AgentMinimax(Agent):
     # TODO: section b : 1
+    def RBminimax(self,env: WarehouseEnv,agent_id,D,turn=True ):
+        if env.done() or D == 0:
+            print(self.heuristic(env,agent_id))
+            return self.heuristic(env,agent_id), None
+
+        chosen_step = None
+
+        if turn:
+            curmax = -np.inf
+            operators, children = self.successors(env, agent_id)
+            for operator,child in zip(operators, children):
+                v = self.RBminimax(env,agent_id,D-1,not turn)[0]
+                curmax = max(v,curmax)
+                chosen_step = operator
+            return curmax, chosen_step
+        else:
+            curmin = np.inf
+            operators, children = self.successors(env, agent_id)
+            for operator, child in zip(operators, children):
+                v = self.RBminimax(env,agent_id,D-1,not turn)[0]
+                v = min(curmin,v)
+            return curmin, None
+
+
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        raise NotImplementedError()
+        return self.RBminimax(env,agent_id,4,True)[1]
 
 
 class AgentAlphaBeta(Agent):
