@@ -37,8 +37,6 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
 
         max = 10 - min
 
-        print(min)
-
     return h + max
 class AgentGreedyImproved(AgentGreedy):
     def heuristic(self, env: WarehouseEnv, robot_id: int):
