@@ -5,8 +5,41 @@ import random
 
 # TODO: section a : 3
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
-    pass
+    h = 0
+    robot = env.get_robot(robot_id)
 
+    if env.robot_is_occupied(robot_id):
+        doesHoldBox = 1
+    else:
+        doesHoldBox = 0
+
+    h += robot.battery + robot.credit + 2 * doesHoldBox
+
+    max = -100
+
+    for package in env.packages:
+        if doesHoldBox == 1:
+            cost = manhattan_distance(robot.position, robot.package.destination) + 1
+            utility = manhattan_distance(robot.package.position, robot.package.destination) * 2 - cost
+
+        else:
+            cost = manhattan_distance(robot.position, package.position) + manhattan_distance(package.destination, package.position) + 2
+            utility = manhattan_distance(package.position, package.destination) * 2 - cost
+
+        if(utility > max):
+            max = utility
+
+    if(max == -100):
+        min = manhattan_distance(robot.position, env.charge_stations[0].position)
+
+        if min > manhattan_distance(robot.position, env.charge_stations[1].position):
+            min = manhattan_distance(robot.position, env.charge_stations[1].position)
+
+        max = 10 - min
+
+        print(min)
+
+    return h + max
 class AgentGreedyImproved(AgentGreedy):
     def heuristic(self, env: WarehouseEnv, robot_id: int):
         return smart_heuristic(env, robot_id)
@@ -35,8 +68,8 @@ class AgentHardCoded(Agent):
     def __init__(self):
         self.step = 0
         # specifiy the path you want to check - if a move is illegal - the agent will choose a random move
-        self.trajectory = ["move north", "move east", "move north", "move north", "pick_up", "move east", "move east",
-                           "move south", "move south", "move south", "move south", "drop_off"]
+        self.trajectory = ["move north", "move south", "move north", "move south", "move north",
+                           "move south", "move north", "move south", "move north", "move south"]
 
     def run_step(self, env: WarehouseEnv, robot_id, time_limit):
         if self.step == len(self.trajectory):
