@@ -78,7 +78,7 @@ class AgentMinimax(Agent):
             if (v < curmin):
                 curmin = v
                 chosen_step = operator
-        return curmin, None
+        return curmin, chosen_step
 
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
         time_factor = 5
