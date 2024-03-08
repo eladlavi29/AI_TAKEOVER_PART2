@@ -8,6 +8,7 @@ import time
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
     #TODO: print heuristic of mission and h at different points
 
+
     h = 0
     robot = env.get_robot(robot_id)
 
