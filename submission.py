@@ -4,11 +4,7 @@ import random
 import numpy as np
 import time
 
-# TODO: section a : 3
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
-    #TODO: print heuristic of mission and h at different points
-
-
     h = 0
     robot = env.get_robot(robot_id)
 
@@ -17,10 +13,11 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     else:
         doesHoldBox = 0
 
-    if robot.credit > 15:
-        h += 10 * robot.credit + doesHoldBox
-    else:
-        h += 4 * robot.battery + 3 * robot.credit + doesHoldBox
+    h += 10 * robot.credit + doesHoldBox
+    # if robot.credit > 15:
+    #     h += 10 * robot.credit + doesHoldBox
+    # else:
+    #     h += 4 * robot.battery + 3 * robot.credit + doesHoldBox
 
     package = env.packages[0]
     if doesHoldBox == 1:
@@ -30,14 +27,14 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     else:
         cost = manhattan_distance(robot.position, package.position) + manhattan_distance(package.destination, package.position) + 2
         mission = manhattan_distance(package.position, package.destination) * 2 - cost
-
-    if(cost > robot.battery):
-        min = manhattan_distance(robot.position, env.charge_stations[0].position)
-
-        if min > manhattan_distance(robot.position, env.charge_stations[1].position):
-            min = manhattan_distance(robot.position, env.charge_stations[1].position)
-
-        mission = 10 - min
+    #
+    # if(cost > robot.battery):
+    #     min = manhattan_distance(robot.position, env.charge_stations[0].position)
+    #
+    #     if min > manhattan_distance(robot.position, env.charge_stations[1].position):
+    #         min = manhattan_distance(robot.position, env.charge_stations[1].position)
+    #
+    #     mission = 10 - min
 
     max_cost = 1000
 
@@ -48,10 +45,8 @@ class AgentGreedyImproved(AgentGreedy):
 
 
 class AgentMinimax(Agent):
-
     def heuristic(self, env: WarehouseEnv, robot_id: int):
         return smart_heuristic(env, robot_id)
-    # TODO: section b : 1
     def RBminimax(self, env: WarehouseEnv, agent_id, D, turn=True):
         if env.done() or D == 0:
             return self.heuristic(env, agent_id), self.successors(env,agent_id)[0][0]
@@ -79,7 +74,7 @@ class AgentMinimax(Agent):
         return curmin, None
 
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        time_factor = 5
+        time_factor = 10
         previous_iteration_duration = 0
         d = 1
 
@@ -96,7 +91,6 @@ class AgentMinimax(Agent):
             time_limit -= previous_iteration_duration
 
 class AgentAlphaBeta(Agent):
-    # TODO: section c : 1
     def heuristic(self, env: WarehouseEnv, robot_id: int):
         return smart_heuristic(env, robot_id)
 
@@ -145,21 +139,20 @@ class AgentAlphaBeta(Agent):
             time_limit -= previous_iteration_duration
 
 class AgentExpectimax(Agent):
-    # TODO: section d : 1
     def heuristic(self, env: WarehouseEnv, robot_id: int):
         return smart_heuristic(env, robot_id)
     #
     def probabilities(self,env: WarehouseEnv, agent_id,operator):
-        legal_ops = self.successors(env,agent_id)[0]
+        legal_ops = env.get_legal_operators(robot_index=1-agent_id)
         if operator not in legal_ops:
             return 0.0
         is_move_right = ('move east' in legal_ops)
         is_collect_package = ('pick up' in legal_ops)
-        sum = len(legal_ops) + is_move_right + is_collect_package
+        sum_options = len(legal_ops) + is_move_right + is_collect_package
         if operator == 'move east' or operator == 'pick up':
-            return 2/sum
+            return 2/sum_options
         else:
-            return 1/sum
+            return 1/sum_options
 
     def expectimax(self, env: WarehouseEnv, agent_id, D, turn=True):
         if env.done() or D == 0:
@@ -174,22 +167,22 @@ class AgentExpectimax(Agent):
                     curmax = v
                     chosen_step = operator
             return curmax, chosen_step
+
         expectation = 0
         operators, children = self.successors(env, 1-agent_id)
         for operator, child in zip(operators, children):
             v = self.expectimax(child, agent_id, D-1, not turn)[0]
             expectation += self.probabilities(env,agent_id,operator)*v
+
         return expectation, None
 
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-
-        time_factor = 10
+        time_factor = 15
         previous_iteration_duration = 0
         d = 1
         step = None
         while True:
             if time_limit < time_factor * previous_iteration_duration:
-                print(d)
                 return step
             d += 1
             start_time = time.time()
